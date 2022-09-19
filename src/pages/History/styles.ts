@@ -70,7 +70,7 @@ const STATUS_COLORS = {
 // as const server para sempre esses valores vão ser esse, sem mundaça.
 
 interface StatusProps {
-  statusColor: 'yellow' | 'red' | 'green'
+  statusColor: keyof typeof STATUS_COLORS
 }
 
 export const Status = styled.span<StatusProps>`
