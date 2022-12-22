@@ -76,7 +76,7 @@ export function Home() {
             {...register('task')}
           />
           <datalist id="task-suggestions">
-            <option value="projeto 1" />
+            <option value="projeto 11" />
             <option value="projeto 2" />
             <option value="projeto 3" />
             <option value="projeto 4" />
