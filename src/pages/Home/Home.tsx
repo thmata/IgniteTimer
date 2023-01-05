@@ -20,7 +20,7 @@ const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'Informe a Tarefa'),
   minutesAmount: zod
     .number()
-    .min(5, 'O ciclo precisa ser de no mínimo 5 minutos')
+    .min(1, 'O ciclo precisa ser de no mínimo 5 minutos')
     .max(60, 'O Intervalo precisa ser de no maximo 60 minutos.'),
 })
 
@@ -34,6 +34,7 @@ interface Cycle {
   minutesAmount: number;
   startDate: Date
   interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
@@ -52,20 +53,38 @@ export function Home() {
 
   const activeCycle = cycles.find(cycle => cycle.id === activeCycleId);
 
-  useEffect(() => {
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
 
+  useEffect(() => {
     let interval: number
 
     if(activeCycle) {
       interval = setInterval(() => {
-        setAmountSecondsPassed(differenceInSeconds(new Date(), activeCycle.startDate))
+
+        const secondsDifference = differenceInSeconds(new Date(), activeCycle.startDate) 
+
+        if(secondsDifference >= totalSeconds) {
+          setCycles(cycles.map(cycle => {
+            if (cycle.id === activeCycleId){
+              return {...cycle, interruptedDate: new Date()}
+            } else {
+              return cycle
+            }
+          }))
+
+          setAmountSecondsPassed(totalSeconds)
+          clearInterval(interval)
+        } else {
+          setAmountSecondsPassed(secondsDifference)
+        }
+
       }, 1000)
     }
 
     return () => {
       clearInterval(interval)
     }
-  },[activeCycle])
+  },[activeCycle, totalSeconds])
 
   function handleCreateNewCycle(data: any) {
     const newCycle: Cycle = {
@@ -93,14 +112,10 @@ export function Home() {
   }
 
   
-  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 
   const minutesAmount = Math.floor(currentSeconds / 60);
   const secondsAmount = currentSeconds % 60
-
-   
-  console.log("OLÀAAA", cycles)
 
   const minutes = String(minutesAmount).padStart(2, '0')
   const seconds = String(secondsAmount).padStart(2, '0')
@@ -138,7 +153,7 @@ export function Home() {
             placeholder="00"
             id="minutesAmount"
             type="number"
-            step={5}
+            step={1}
             disabled={!!activeCycle}
             {...register('minutesAmount', { valueAsNumber: true })}
           />
